@@ -26,6 +26,19 @@ If you deploy, ensure hosting includes:
 - `shared/` assets
 - Firebase configuration files
 
+## Deploy to Vercel
+
+This repo is a static site—no build step required.
+
+1. Push to GitHub (already set up).
+2. In Vercel, import the repository `mrkivn/HCI-admin`.
+3. Framework preset: "Other" (or "Static Site").
+4. Build Command: leave empty.
+5. Output Directory: `/` (root).
+6. Deploy. Vercel will serve `index.html` as the entry.
+
+`vercel.json` is included to enable clean URLs and asset caching.
+
 ## Develop
 
 - Update navigation from `index.html` if you add/remove modules
