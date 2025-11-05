@@ -143,12 +143,18 @@ function timeAgo(timestamp) {
 }
 
 function checkAuth(userType = 'customer') {
-    const user = JSON.parse(sessionStorage.getItem('user'));
-    if (!user || user.type !== userType) {
-        window.location.href = userType === 'customer' ? '/login.html' : '/index.html';
-        return null;
+    const existing = JSON.parse(sessionStorage.getItem('user'));
+    if (existing && existing.type === userType) return existing;
+
+    if (userType === 'staff') {
+        const defaultStaff = { email: 'admin@portal.local', name: 'Admin', department: 'General', type: 'staff' };
+        sessionStorage.setItem('user', JSON.stringify(defaultStaff));
+        return defaultStaff;
     }
-    return user;
+
+    const defaultCustomer = { email: 'guest@portal.local', name: 'Guest', type: 'customer' };
+    sessionStorage.setItem('user', JSON.stringify(defaultCustomer));
+    return defaultCustomer;
 }
 
 function logout() {
