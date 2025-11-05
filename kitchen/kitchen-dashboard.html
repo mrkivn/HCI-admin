@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kitchen Dashboard - GINHAWA Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <style>
+        .dashboard-header {
+            background: var(--black-primary);
+            color: var(--white);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-title {
+            color: var(--gold-primary);
+            font-size: 2rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            color: var(--white);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid var(--gold-primary);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            color: var(--gold-primary);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .filters {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--gold-primary);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background-color: var(--gold-primary);
+            color: var(--black-primary);
+            border-color: var(--gold-primary);
+        }
+
+        .orders-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .order-card {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 4px solid var(--gold-primary);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-id {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--gold-primary);
+        }
+
+        .order-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .order-items {
+            background-color: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .item-qty {
+            color: var(--text-secondary);
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .status-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 15px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+
+        .status-btn.pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .status-btn.preparing {
+            background-color: #2196F3;
+            color: #fff;
+        }
+
+        .status-btn.ready {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        .status-btn.delivered {
+            background-color: #9E9E9E;
+            color: #fff;
+        }
+
+        .status-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .status-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gold-primary);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+            }
+
+            .status-controls {
+                flex-direction: column;
+            }
+
+            .status-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="dashboard-header">
+        <div class="header-top">
+            <h1 class="dashboard-title">
+                <i class="fas fa-utensils"></i>
+                Kitchen Dashboard
+            </h1>
+            <div class="user-info">
+                <p><strong id="staffName">Kitchen Staff</strong></p>
+                <p><small>GINHAWA Hotel - After Glow Restaurant</small></p>
+                <button onclick="logout()" class="btn btn-secondary" style="margin-top: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1400px;">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-clock"></i> Pending Orders</div>
+                <div class="stat-value" id="pendingCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-fire"></i> Preparing</div>
+                <div class="stat-value" id="preparingCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-check-circle"></i> Ready</div>
+                <div class="stat-value" id="readyCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-truck"></i> Delivered Today</div>
+                <div class="stat-value" id="deliveredCount">0</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-row">
+                <button class="filter-btn active" onclick="filterOrders(event, 'All')">
+                    <i class="fas fa-list"></i> All Orders
+                </button>
+                <button class="filter-btn" onclick="filterOrders(event, 'Pending')">
+                    <i class="fas fa-clock"></i> Pending
+                </button>
+                <button class="filter-btn" onclick="filterOrders(event, 'Preparing')">
+                    <i class="fas fa-fire"></i> Preparing
+                </button>
+                <button class="filter-btn" onclick="filterOrders(event, 'Ready')">
+                    <i class="fas fa-check-circle"></i> Ready
+                </button>
+                <button class="filter-btn" onclick="filterOrders(event, 'Delivered')">
+                    <i class="fas fa-truck"></i> Delivered
+                </button>
+            </div>
+        </div>
+
+        <div id="ordersContainer" class="orders-grid"></div>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script>
+        // Check authentication
+        const user = checkAuth('staff');
+        if (user && user.department) {
+            document.getElementById('staffName').textContent = user.department + ' Staff';
+        }
+
+        let currentFilter = 'All';
+        let refreshInterval;
+        let reloadIndicator = null;
+
+        // Load and display orders
+        async function loadOrders(silent = false) {
+            const container = document.getElementById('ordersContainer');
+            if (!silent && container) {
+                // Make it VERY visible
+                container.classList.add('smooth-update', 'updating');
+                // Longer delay to see the animation
+                await new Promise(resolve => setTimeout(resolve, 400));
+            }
+            
+            const allOrders = await getLocalData('orders');
+            const orders = allOrders.filter(o => o.category === 'Food');
+
+            // Filter orders
+            let filteredOrders = orders;
+            if (currentFilter !== 'All') {
+                filteredOrders = orders.filter(order => order.status === currentFilter);
+            }
+
+            // Sort by timestamp (newest first)
+            filteredOrders.sort((a, b) => b.timestamp - a.timestamp);
+
+            // Update stats
+            updateStats(orders);
+
+            // Display orders
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No ${currentFilter === 'All' ? '' : currentFilter} Orders</h3>
+                        <p>Orders will appear here when customers place food orders.</p>
+                    </div>
+                `;
+                if (!silent && container) {
+                    setTimeout(() => {
+                        container.classList.remove('updating');
+                        container.classList.add('reload-content');
+                    }, 50);
+                }
+                return;
+            }
+
+            container.innerHTML = filteredOrders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">${order.id}</div>
+                            <div class="order-time">
+                                <i class="fas fa-clock"></i> ${new Date(order.timestamp).toLocaleString()}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge badge-${order.status.toLowerCase()}">${order.status}</span>
+                        </div>
+                    </div>
+
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-qty">x${item.quantity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="order-details">
+                        <div class="detail-item">
+                            <span class="detail-label"><i class="fas fa-user"></i> Customer:</span>
+                            <span class="detail-value">${order.customerName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label"><i class="fas fa-location-dot"></i> Table/Room:</span>
+                            <span class="detail-value">${order.tableOrRoomNumber || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label"><i class="fas fa-peso-sign"></i> Total:</span>
+                            <span class="detail-value">${formatPrice(order.totalPrice)}</span>
+                        </div>
+                    </div>
+
+                    ${order.notes ? `
+                        <div style="background-color: var(--bg-secondary); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <small><i class="fas fa-comment"></i> <strong>Notes:</strong> ${order.notes}</small>
+                        </div>
+                    ` : ''}
+
+                    <div class="status-controls">
+                        <button class="status-btn pending" 
+                                onclick="updateOrderStatus('${order.id}', 'Pending')"
+                                ${order.status === 'Pending' ? 'disabled' : ''}>
+                            <i class="fas fa-clock"></i> Pending
+                        </button>
+                        <button class="status-btn preparing" 
+                                onclick="updateOrderStatus('${order.id}', 'Preparing')"
+                                ${order.status === 'Preparing' ? 'disabled' : ''}>
+                            <i class="fas fa-fire"></i> Preparing
+                        </button>
+                        <button class="status-btn ready" 
+                                onclick="updateOrderStatus('${order.id}', 'Ready')"
+                                ${order.status === 'Ready' ? 'disabled' : ''}>
+                            <i class="fas fa-check-circle"></i> Ready
+                        </button>
+                        <button class="status-btn delivered" 
+                                onclick="updateOrderStatus('${order.id}', 'Delivered')"
+                                ${order.status === 'Delivered' ? 'disabled' : ''}>
+                            <i class="fas fa-truck"></i> Delivered
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Apply DRAMATIC reload animation after content is loaded
+            if (!silent && container) {
+                setTimeout(() => {
+                    container.classList.remove('updating');
+                    container.classList.add('smooth-update', 'reload-content');
+                    // Clean up animation class after it completes
+                    setTimeout(() => {
+                        container.classList.remove('reload-content');
+                    }, 800);
+                }, 100);
+            }
+        }
+
+        // Update statistics
+        function updateStats(orders) {
+            const pending = orders.filter(o => o.status === 'Pending').length;
+            const preparing = orders.filter(o => o.status === 'Preparing').length;
+            const ready = orders.filter(o => o.status === 'Ready').length;
+            
+            // Count delivered orders from today
+            const today = new Date().setHours(0, 0, 0, 0);
+            const delivered = orders.filter(o => {
+                if (o.status !== 'Delivered') return false;
+                const deliveryTime = o.deliveredAt || o.timestamp;
+                const deliveryDate = new Date(deliveryTime).setHours(0, 0, 0, 0);
+                return deliveryDate === today;
+            }).length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('preparingCount').textContent = preparing;
+            document.getElementById('readyCount').textContent = ready;
+            document.getElementById('deliveredCount').textContent = delivered;
+        }
+
+        // Update order status
+        async function updateOrderStatus(orderId, newStatus) {
+            const orders = await getLocalData('orders');
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+
+            if (orderIndex !== -1) {
+                orders[orderIndex].status = newStatus;
+                if (newStatus === 'Delivered') {
+                    orders[orderIndex].deliveredAt = Date.now();
+                }
+                await setLocalData('orders', orders);
+                showNotification(`Order ${orderId} status updated to ${newStatus}`, 'success');
+                loadOrders();
+            }
+        }
+
+        // Filter orders
+        function filterOrders(evt, filter) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            evt.target.closest('.filter-btn').classList.add('active');
+
+            loadOrders();
+        }
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('user');
+            window.location.href = '../staff-login.html';
+        }
+
+        // Initial load
+        loadOrders();
+
+        // Setup reload indicator
+        const dashboardHeader = document.querySelector('.dashboard-header');
+        if (dashboardHeader && !reloadIndicator) {
+            reloadIndicator = showReloadIndicator(dashboardHeader, 'Auto-refreshing every 5 seconds');
+        }
+
+        // Auto-refresh every 5 seconds
+        refreshInterval = setInterval(() => {
+            updateReloadIndicator(reloadIndicator, 'Refreshing...', true);
+            loadOrders(true); // Silent reload for auto-refresh
+            setTimeout(() => {
+                updateReloadIndicator(reloadIndicator, 'Auto-refreshing every 5 seconds', false);
+            }, 500);
+        }, 5000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

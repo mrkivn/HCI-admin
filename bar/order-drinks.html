@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Order Drinks - After Glow Bar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="../kitchen/order-food.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="../customer-home.html" class="navbar-brand">
+                    <i class="fas fa-hotel"></i>
+                    <span class="brand-name">GINHAWA</span> | <span>After Glow</span>
+                </a>
+
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="../customer-home.html" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userName">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i>
+                                <span>Toggle Theme</span>
+                            </button>
+                            <button class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="menu-header">
+                    <h1><i class="fas fa-cocktail"></i> Order Drinks</h1>
+                    <p>Refreshing beverages for every moment</p>
+                </div>
+
+                <div class="menu-layout">
+                    <!-- Drinks Menu -->
+                    <div class="menu-section">
+                        <h2 class="mb-2">Our Drinks Menu</h2>
+                        <div class="menu-grid" id="menuGrid">
+                            <!-- Menu items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Shopping Cart -->
+                    <div class="cart-section">
+                        <div class="cart-container">
+                            <h2><i class="fas fa-shopping-cart"></i> Your Order</h2>
+                            
+                            <div id="cartItems" class="cart-items">
+                                <p class="text-muted text-center">Your cart is empty</p>
+                            </div>
+
+                            <div id="cartSummary" class="cart-summary" style="display: none;">
+                                <div class="summary-row">
+                                    <span>Subtotal:</span>
+                                    <span id="subtotal">₱0.00</span>
+                                </div>
+                                <div class="summary-total">
+                                    <span>Total:</span>
+                                    <span id="total">₱0.00</span>
+                                </div>
+
+                                <div class="form-group mt-2">
+                                    <label for="tableOrRoom" class="form-label">
+                                        <i class="fas fa-map-marker-alt"></i> Table/Room Number *
+                                    </label>
+                                    <select id="tableOrRoom" class="form-input" required>
+                                        <option value="">Select table or room...</option>
+                                    </select>
+                                </div>
+
+                                <button class="btn btn-primary btn-block" onclick="placeOrder()">
+                                    <i class="fas fa-check"></i> Place Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="text-gold">Order Placed Successfully!</h2>
+                <p class="text-muted mb-2">Your drinks order has been received</p>
+                
+                <div class="order-id-box">
+                    Order ID: <span id="orderId"></span>
+                </div>
+
+                <p class="mt-2"><strong>Estimated Time:</strong> 10-15 minutes</p>
+
+                <div class="button-group mt-3">
+                    <a href="../customer-home.html" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                    <button onclick="closeModal()" class="btn btn-secondary">
+                        <i class="fas fa-plus"></i> Order More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script src="order-drinks.js"></script>
+</body>
+</html>

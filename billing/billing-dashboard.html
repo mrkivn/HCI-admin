@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Billing Dashboard - GINHAWA Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="../front-office/front-office.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="billing-dashboard.html" class="navbar-brand">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span><span class="brand-name">GINHAWA</span> | Billing</span>
+                </a>
+                <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="billing-dashboard.html" class="nav-link active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Billing</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()"><i class="fas fa-moon"></i> Toggle Theme</button>
+                            <button class="dropdown-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="container">
+                <h1 class="text-gold mb-2"><i class="fas fa-file-invoice-dollar"></i> Payment Confirmation Center</h1>
+
+                <div class="grid-3 mb-3">
+                    <div class="stat-card">
+                        <h3 id="pendingPayments">0</h3>
+                        <p>Pending Verification</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="confirmedPayments">0</h3>
+                        <p>Confirmed Today</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="flaggedPayments">0</h3>
+                        <p>Flagged/Issues</p>
+                    </div>
+                </div>
+
+                <div class="tabs mb-2">
+                    <button class="tab active" onclick="switchTab(event, 'pending')">Pending Verification</button>
+                    <button class="tab" onclick="switchTab(event, 'all')">All Transactions</button>
+                    <button class="tab" onclick="switchTab(event, 'flagged')">Flagged</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Payment Transactions</h2>
+                        <div class="filter-group" style="display: flex; gap: 10px;">
+                            <select id="paymentFilter" class="form-select" style="max-width: 200px;" onchange="loadDashboard()">
+                                <option value="all">All Payment Methods</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="GCash">GCash</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Customer</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Payment Method</th>
+                                        <th>Payment Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script>
+        const user = checkAuth('staff');
+        let currentTab = 'pending';
+
+        function switchTab(event, tab) {
+            currentTab = tab;
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            loadDashboard();
+        }
+
+        async function loadDashboard() {
+            const bookings = await getLocalData('hotelBookings');
+            const filter = document.getElementById('paymentFilter').value;
+            
+            // Calculate stats
+            const today = new Date().setHours(0,0,0,0);
+            const pending = bookings.filter(b => 
+                b.status !== 'Cancelled' && (!b.paymentStatus || b.paymentStatus === 'Pending')
+            ).length;
+            const confirmedToday = bookings.filter(b => 
+                b.paymentStatus === 'Confirmed' && 
+                b.paymentConfirmedDate && 
+                new Date(b.paymentConfirmedDate).setHours(0,0,0,0) === today
+            ).length;
+            const flagged = bookings.filter(b => b.paymentStatus === 'Flagged').length;
+            
+            document.getElementById('pendingPayments').textContent = pending;
+            document.getElementById('confirmedPayments').textContent = confirmedToday;
+            document.getElementById('flaggedPayments').textContent = flagged;
+            
+            loadTransactions(bookings, filter);
+        }
+
+        function loadTransactions(bookings, paymentFilter) {
+            const container = document.getElementById('transactionsList');
+            
+            // Filter by tab
+            let filtered = bookings.filter(b => b.status !== 'Cancelled');
+            
+            if (currentTab === 'pending') {
+                filtered = filtered.filter(b => !b.paymentStatus || b.paymentStatus === 'Pending');
+            } else if (currentTab === 'flagged') {
+                filtered = filtered.filter(b => b.paymentStatus === 'Flagged');
+            }
+            
+            // Filter by payment method
+            if (paymentFilter !== 'all') {
+                filtered = filtered.filter(b => b.paymentMethod === paymentFilter);
+            }
+            
+            const sortedBookings = filtered.sort((a, b) => b.bookingDate - a.bookingDate);
+            
+            if (sortedBookings.length === 0) {
+                container.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">No transactions found</td></tr>';
+                return;
+            }
+            
+            container.innerHTML = sortedBookings.map(booking => {
+                const paymentStatus = booking.paymentStatus || 'Pending';
+                const statusBadge = getPaymentStatusBadge(paymentStatus);
+                const actions = getPaymentActions(booking);
+                
+                return `
+                    <tr>
+                        <td><strong>#${booking.id}</strong></td>
+                        <td>${booking.customerName}</td>
+                        <td>Hotel Booking</td>
+                        <td class="text-gold"><strong>${formatPrice(booking.totalPrice)}</strong></td>
+                        <td>${booking.paymentMethod}</td>
+                        <td>${statusBadge}</td>
+                        <td>${new Date(booking.bookingDate).toLocaleDateString()}</td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getPaymentStatusBadge(status) {
+            const badges = {
+                'Pending': '<span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span>',
+                'Confirmed': '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Confirmed</span>',
+                'Flagged': '<span class="badge badge-danger"><i class="fas fa-flag"></i> Flagged</span>'
+            };
+            return badges[status] || badges['Pending'];
+        }
+
+        function getPaymentActions(booking) {
+            const status = booking.paymentStatus || 'Pending';
+            
+            if (status === 'Confirmed') {
+                return `<small style="color: var(--text-secondary);">Verified</small>`;
+            }
+            
+            return `
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-sm btn-success" onclick="confirmPayment(${booking.id})" title="Confirm Payment">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn-sm btn-danger" onclick="flagPayment(${booking.id})" title="Flag Issue">
+                        <i class="fas fa-flag"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        async function confirmPayment(bookingId) {
+            const note = prompt('Add a note (optional):');
+            const bookings = await getLocalData('hotelBookings');
+            const booking = bookings.find(b => b.id === bookingId);
+            
+            if (booking) {
+                booking.paymentStatus = 'Confirmed';
+                booking.paymentConfirmedDate = new Date().toISOString();
+                booking.paymentNote = note || '';
+                booking.paymentConfirmedBy = 'Billing Staff';
+                
+                await setLocalData('hotelBookings', bookings);
+                showNotification('Payment confirmed successfully!', 'success');
+                loadDashboard();
+            }
+        }
+
+        async function flagPayment(bookingId) {
+            const reason = prompt('Enter reason for flagging this payment:');
+            if (!reason) return;
+            
+            const bookings = await getLocalData('hotelBookings');
+            const booking = bookings.find(b => b.id === bookingId);
+            
+            if (booking) {
+                booking.paymentStatus = 'Flagged';
+                booking.paymentFlaggedDate = new Date().toISOString();
+                booking.paymentNote = reason;
+                booking.paymentFlaggedBy = 'Billing Staff';
+                
+                await setLocalData('hotelBookings', bookings);
+                showNotification('Payment flagged for review', 'warning');
+                loadDashboard();
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

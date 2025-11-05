@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Housekeeping Dashboard - GINHAWA Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="../front-office/front-office.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="housekeeping-dashboard.html" class="navbar-brand">
+                    <i class="fas fa-broom"></i>
+                    <span><span class="brand-name">GINHAWA</span> | Housekeeping</span>
+                </a>
+                <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="housekeeping-dashboard.html" class="nav-link active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Housekeeping</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()"><i class="fas fa-moon"></i> Toggle Theme</button>
+                            <button class="dropdown-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="container">
+                <h1 class="text-gold mb-2"><i class="fas fa-broom"></i> Housekeeping Dashboard</h1>
+
+                <div class="grid-3 mb-3">
+                    <div class="stat-card">
+                        <h3 id="pendingRequests">0</h3>
+                        <p>Pending Requests</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="inProgressRequests">0</h3>
+                        <p>In Progress</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="completedToday">0</h3>
+                        <p>Completed Today</p>
+                    </div>
+                </div>
+
+                <div class="tabs mb-2">
+                    <button class="tab active" onclick="switchTab(event, 'pending')">Pending</button>
+                    <button class="tab" onclick="switchTab(event, 'inprogress')">In Progress</button>
+                    <button class="tab" onclick="switchTab(event, 'completed')">Completed</button>
+                    <button class="tab" onclick="switchTab(event, 'all')">All</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div id="requestsList"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script>
+        const user = checkAuth('staff');
+        let currentTab = 'pending';
+
+        function loadDashboard() {
+            updateStats();
+            loadRequests();
+        }
+
+        async function updateStats() {
+            const requests = await getLocalData('housekeepingRequests');
+            document.getElementById('pendingRequests').textContent = requests.filter(r => r.status === 'Pending').length;
+            document.getElementById('inProgressRequests').textContent = requests.filter(r => r.status === 'In Progress').length;
+            
+            const today = new Date().setHours(0,0,0,0);
+            document.getElementById('completedToday').textContent = requests.filter(r => 
+                r.status === 'Completed' && new Date(r.completedAt || 0).setHours(0,0,0,0) === today
+            ).length;
+        }
+
+        function switchTab(evt, tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            evt.currentTarget.classList.add('active');
+            loadRequests();
+        }
+
+        async function loadRequests() {
+            const container = document.getElementById('requestsList');
+            let requests = await getLocalData('housekeepingRequests');
+            
+            if (currentTab !== 'all') {
+                const statusMap = { 'pending': 'Pending', 'inprogress': 'In Progress', 'completed': 'Completed' };
+                requests = requests.filter(r => r.status === statusMap[currentTab]);
+            }
+            
+            requests.sort((a, b) => b.timestamp - a.timestamp);
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No requests found.</p>';
+                return;
+            }
+            
+            container.innerHTML = requests.map(request => `
+                <div class="booking-item">
+                    <div class="booking-item-header">
+                        <div class="booking-id">${request.id}</div>
+                        <div>${getStatusBadge(request.status)}</div>
+                    </div>
+                    <div class="booking-info">
+                        <div class="info-item"><span class="info-label">Room Number</span><span class="info-value">${request.roomNumber}</span></div>
+                        <div class="info-item"><span class="info-label">Guest</span><span class="info-value">${request.customerName}</span></div>
+                        <div class="info-item"><span class="info-label">Time</span><span class="info-value">${new Date(request.timestamp).toLocaleString()}</span></div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <strong>Request Types:</strong> ${request.requestType.join(', ')}
+                        ${request.notes ? `<br><strong>Notes:</strong> ${request.notes}` : ''}
+                    </div>
+                    <div class="action-buttons">
+                        ${request.status === 'Pending' ? `<button class="btn btn-primary btn-sm" onclick="updateStatus('${request.id}', 'In Progress')"><i class="fas fa-play"></i> Start</button>` : ''}
+                        ${request.status === 'In Progress' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${request.id}', 'Completed')"><i class="fas fa-check"></i> Complete</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(requestId, newStatus) {
+            const requests = await getLocalData('housekeepingRequests');
+            const request = requests.find(r => r.id === requestId);
+            if (request) {
+                request.status = newStatus;
+                if (newStatus === 'Completed') {
+                    request.completedAt = Date.now();
+                }
+                await setLocalData('housekeepingRequests', requests);
+                showNotification(`Request ${newStatus.toLowerCase()}`, 'success');
+                loadDashboard();
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'Pending': '<span class="badge badge-warning">Pending</span>',
+                'In Progress': '<span class="badge badge-info">In Progress</span>',
+                'Completed': '<span class="badge badge-success">Completed</span>'
+            };
+            return badges[status] || `<span class="badge">${status}</span>`;
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

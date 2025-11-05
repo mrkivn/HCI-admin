@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==================================================
+    // FIRESTORE SECURITY RULES - DEVELOPMENT MODE
+    // ==================================================
+    // 
+    // WARNING: These rules allow read/write access to all
+    // documents. This is fine for development/demo purposes
+    // but MUST be restricted for production use.
+    //
+    // For production, implement proper authentication and
+    // authorization rules based on your security requirements.
+    // ==================================================
+    
+    // Allow read/write access to all documents (DEVELOPMENT ONLY)
+    match /{document=**} {
+      allow read, write: if true;
+    }
+    
+    // ==================================================
+    // PRODUCTION SECURITY RULES EXAMPLES
+    // ==================================================
+    // 
+    // Uncomment and customize these rules for production:
+    //
+    // // Customers collection - users can only read/write their own data
+    // match /customers/{customerId} {
+    //   allow read, write: if request.auth != null && request.auth.uid == customerId;
+    // }
+    //
+    // // Staff collection - only authenticated staff can read
+    // match /staff/{staffId} {
+    //   allow read: if request.auth != null;
+    //   allow write: if false; // Staff accounts managed by admin only
+    // }
+    //
+    // // Hotel bookings - authenticated users can create, read own bookings
+    // match /hotelBookings/{bookingId} {
+    //   allow read: if request.auth != null;
+    //   allow create: if request.auth != null;
+    //   allow update, delete: if request.auth != null && 
+    //                          resource.data.customerEmail == request.auth.token.email;
+    // }
+    //
+    // // Restaurant reservations
+    // match /restaurantReservations/{reservationId} {
+    //   allow read: if request.auth != null;
+    //   allow create: if request.auth != null;
+    //   allow update, delete: if request.auth != null && 
+    //                          resource.data.email == request.auth.token.email;
+    // }
+    //
+    // // Orders - authenticated users can create, read own orders
+    // match /orders/{orderId} {
+    //   allow read: if request.auth != null;
+    //   allow create: if request.auth != null;
+    //   allow update: if request.auth != null;
+    // }
+    //
+    // // Rooms - read-only for customers, write for staff
+    // match /rooms/{roomId} {
+    //   allow read: if request.auth != null;
+    //   allow write: if request.auth != null && 
+    //                request.auth.token.role == 'staff';
+    // }
+    //
+    // ==================================================
+  }
+}

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Room Facilities Dashboard - GINHAWA Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="room-facilities.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="room-facilities-dashboard.html" class="navbar-brand">
+                    <i class="fas fa-hotel"></i>
+                    <span><span class="brand-name">GINHAWA</span> | Room Facilities</span>
+                </a>
+
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="room-facilities-dashboard.html" class="nav-link active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-door-open"></i>
+                            <span>Room Facilities</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i>
+                                <span>Toggle Theme</span>
+                            </button>
+                            <button class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <h1 class="text-gold mb-2"><i class="fas fa-door-open"></i> Room Facilities Dashboard</h1>
+
+                <!-- Stats -->
+                <div class="grid-4 mb-3">
+                    <div class="stat-card">
+                        <h3 id="totalRooms">0</h3>
+                        <p>Total Rooms</p>
+                    </div>
+                    <div class="stat-card stat-available">
+                        <h3 id="availableRooms">0</h3>
+                        <p>Available</p>
+                    </div>
+                    <div class="stat-card stat-occupied">
+                        <h3 id="occupiedRooms">0</h3>
+                        <p>Occupied</p>
+                    </div>
+                    <div class="stat-card stat-cleaning">
+                        <h3 id="cleaningRooms">0</h3>
+                        <p>Cleaning</p>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h3 class="mb-2"><i class="fas fa-filter"></i> Filter Rooms</h3>
+                        <div class="filter-group">
+                            <div class="filter-item">
+                                <label>Status</label>
+                                <select id="statusFilter" class="form-control" onchange="applyFilters()">
+                                    <option value="all">All Statuses</option>
+                                    <option value="Available">Available</option>
+                                    <option value="Occupied">Occupied</option>
+                                    <option value="Cleaning">Cleaning</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Room Type</label>
+                                <select id="typeFilter" class="form-control" onchange="applyFilters()">
+                                    <option value="all">All Types</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Deluxe">Deluxe</option>
+                                    <option value="Suite">Suite</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Search Room Number</label>
+                                <input type="text" id="searchRoom" class="form-control" placeholder="Search by room number..." oninput="applyFilters()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs mb-2">
+                    <button class="tab active" onclick="switchTab(event, 'all')">All Rooms</button>
+                    <button class="tab" onclick="switchTab(event, 'available')">Available</button>
+                    <button class="tab" onclick="switchTab(event, 'occupied')">Occupied</button>
+                    <button class="tab" onclick="switchTab(event, 'cleaning')">Cleaning</button>
+                </div>
+
+                <!-- Rooms Grid -->
+                <div class="card">
+                    <div class="card-body">
+                        <div id="roomsGrid" class="rooms-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Room Details Modal -->
+    <div id="roomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-door-open"></i> Room Details</h2>
+                <button class="close-modal" onclick="closeRoomModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="roomModalBody">
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Customer Modal -->
+    <div id="assignCustomerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Assign Customer to Room</h2>
+                <button class="close-modal" onclick="closeAssignCustomerModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group mb-2">
+                    <label for="selectedRoom">Room Number</label>
+                    <input type="text" id="selectedRoom" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group mb-2">
+                    <label for="customerSelect">Select Customer</label>
+                    <select id="customerSelect" class="form-control">
+                        <option value="">-- Select a Customer --</option>
+                    </select>
+                </div>
+
+                <div id="selectedCustomerInfo" class="card mb-2" style="display: none;">
+                    <div class="card-body">
+                        <h4><i class="fas fa-user-circle"></i> Customer Information</h4>
+                        <div id="customerInfoDisplay"></div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="checkinDate">Check-in Date</label>
+                    <input type="date" id="checkinDate" class="form-control" required>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="checkoutDate">Check-out Date</label>
+                    <input type="date" id="checkoutDate" class="form-control" required>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="numberOfGuests">Number of Guests</label>
+                    <input type="number" id="numberOfGuests" class="form-control" min="1" max="4" value="1" required>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="destination">Destination</label>
+                    <input type="text" id="destination" class="form-control" placeholder="e.g., Vacation, Business" required>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="paymentMethod">Payment Method</label>
+                    <select id="paymentMethod" class="form-control" required>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="GCash">GCash</option>
+                    </select>
+                </div>
+
+                <div id="bookingSummary" class="card mb-2" style="display: none;">
+                    <div class="card-body">
+                        <h4><i class="fas fa-file-invoice"></i> Booking Summary</h4>
+                        <div id="summaryDisplay"></div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-success" onclick="confirmAssignment()">
+                        <i class="fas fa-check"></i> Assign Customer
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeAssignCustomerModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script src="room-facilities.js"></script>
+</body>
+</html>

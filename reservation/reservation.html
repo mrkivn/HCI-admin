@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reserve After Glow Restaurant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="reservation.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="../customer-home.html" class="navbar-brand">
+                    <i class="fas fa-hotel"></i>
+                    <span class="brand-name">GINHAWA</span> | <span>After Glow</span>
+                </a>
+
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="../customer-home.html" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userName">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i>
+                                <span>Toggle Theme</span>
+                            </button>
+                            <button class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="reservation-header">
+                    <h1><i class="fas fa-utensils"></i> After Glow Restaurant</h1>
+                    <p>Where Every Moment Glows</p>
+                </div>
+
+                <!-- Reservation Form -->
+                <div id="reservationForm" class="reservation-view active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Make a Reservation</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="formReservation" onsubmit="submitReservation(event)">
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="reservationDate" class="form-label">
+                                            <i class="fas fa-calendar"></i> Date
+                                        </label>
+                                        <input type="date" id="reservationDate" class="form-input" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="reservationTime" class="form-label">
+                                            <i class="fas fa-clock"></i> Time
+                                        </label>
+                                        <select id="reservationTime" class="form-select" required>
+                                            <option value="">Select time...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-chair"></i> Seating Preference
+                                    </label>
+                                    <div class="seating-options">
+                                        <div class="seating-card" onclick="selectSeating('Indoor')">
+                                            <i class="fas fa-building"></i>
+                                            <span>Indoor Seating</span>
+                                        </div>
+                                        <div class="seating-card" onclick="selectSeating('Outdoor')">
+                                            <i class="fas fa-tree"></i>
+                                            <span>Outdoor Seating</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="seating" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="numberOfGuests" class="form-label">
+                                        <i class="fas fa-users"></i> Number of Guests
+                                    </label>
+                                    <input type="number" id="numberOfGuests" class="form-input" min="1" max="20" value="2" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="specialRequests" class="form-label">
+                                        <i class="fas fa-comment"></i> Special Requests (Optional)
+                                    </label>
+                                    <textarea id="specialRequests" class="form-textarea" placeholder="Any dietary restrictions, celebrations, or special requirements..."></textarea>
+                                </div>
+
+                                <div class="customer-info">
+                                    <h3><i class="fas fa-user"></i> Your Information</h3>
+                                    <div class="info-row">
+                                        <span class="info-label">Name:</span>
+                                        <span class="info-value" id="customerName"></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value" id="customerEmail"></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Phone:</span>
+                                        <span class="info-value" id="customerPhone"></span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-check"></i> Reserve Table
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation View -->
+                <div id="confirmationView" class="reservation-view">
+                    <div class="card confirmation-card">
+                        <div class="card-body text-center">
+                            <div class="success-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2 class="text-gold">Reservation Confirmed!</h2>
+                            <p class="text-muted mb-3">Your table has been successfully reserved</p>
+                            
+                            <div class="reservation-id">
+                                Reservation ID: <span id="reservationId"></span>
+                            </div>
+
+                            <div class="confirmation-details" id="confirmationDetails">
+                                <!-- Details will be loaded here -->
+                            </div>
+
+                            <div class="button-group">
+                                <a href="../customer-home.html" class="btn btn-primary">
+                                    <i class="fas fa-home"></i> Back to Home
+                                </a>
+                                <button onclick="makeAnotherReservation()" class="btn btn-outline">
+                                    <i class="fas fa-plus"></i> Make Another Reservation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script src="reservation.js"></script>
+</body>
+</html>

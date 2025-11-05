@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bar Dashboard - After Glow Bar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="../front-office/front-office.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="bar-dashboard.html" class="navbar-brand">
+                    <i class="fas fa-cocktail"></i>
+                    <span><span class="brand-name">GINHAWA</span> | After Glow Bar</span>
+                </a>
+                <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="bar-dashboard.html" class="nav-link active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Bar</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()"><i class="fas fa-moon"></i> Toggle Theme</button>
+                            <button class="dropdown-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="container">
+                <h1 class="text-gold mb-2"><i class="fas fa-cocktail"></i> Bar Dashboard</h1>
+
+                <div class="grid-3 mb-3">
+                    <div class="stat-card">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>Pending Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="preparingOrders">0</h3>
+                        <p>Preparing</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="completedToday">0</h3>
+                        <p>Completed Today</p>
+                    </div>
+                </div>
+
+                <div class="tabs mb-2">
+                    <button class="tab active" onclick="switchTab(event, 'pending')">Pending</button>
+                    <button class="tab" onclick="switchTab(event, 'preparing')">Preparing</button>
+                    <button class="tab" onclick="switchTab(event, 'ready')">Ready</button>
+                    <button class="tab" onclick="switchTab(event, 'all')">All Orders</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div id="ordersList"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script>
+        const user = checkAuth('staff');
+        let currentTab = 'pending';
+
+        function loadDashboard() {
+            updateStats();
+            loadOrders();
+        }
+
+        async function updateStats() {
+            const orders = (await getLocalData('orders')).filter(o => o.category === 'Drinks');
+            document.getElementById('pendingOrders').textContent = orders.filter(o => o.status === 'Pending').length;
+            document.getElementById('preparingOrders').textContent = orders.filter(o => o.status === 'Preparing').length;
+            
+            const today = new Date().setHours(0,0,0,0);
+            document.getElementById('completedToday').textContent = orders.filter(o => 
+                o.status === 'Completed' && new Date(o.timestamp).setHours(0,0,0,0) === today
+            ).length;
+        }
+
+        function switchTab(evt, tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            evt.currentTarget.classList.add('active');
+            loadOrders();
+        }
+
+        async function loadOrders() {
+            const container = document.getElementById('ordersList');
+            let orders = (await getLocalData('orders')).filter(o => o.category === 'Drinks');
+            
+            if (currentTab !== 'all') {
+                const statusMap = { 'pending': 'Pending', 'preparing': 'Preparing', 'ready': 'Ready' };
+                orders = orders.filter(o => o.status === statusMap[currentTab]);
+            }
+            
+            orders.sort((a, b) => b.timestamp - a.timestamp);
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No orders found.</p>';
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => `
+                <div class="booking-item">
+                    <div class="booking-item-header">
+                        <div class="booking-id">${order.id}</div>
+                        <div>${getStatusBadge(order.status)}</div>
+                    </div>
+                    <div class="booking-info">
+                        <div class="info-item"><span class="info-label">Customer</span><span class="info-value">${order.customerName}</span></div>
+                        <div class="info-item"><span class="info-label">Table/Room</span><span class="info-value">${order.tableOrRoomNumber}</span></div>
+                        <div class="info-item"><span class="info-label">Total</span><span class="info-value text-gold">${formatPrice(order.totalPrice)}</span></div>
+                        <div class="info-item"><span class="info-label">Time</span><span class="info-value">${new Date(order.timestamp).toLocaleString()}</span></div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <strong>Items:</strong>
+                        <ul>${order.items.map(item => `<li>${item.name} x${item.quantity} - ${formatPrice(item.price * item.quantity)}</li>`).join('')}</ul>
+                    </div>
+                    <div class="action-buttons">
+                        ${order.status === 'Pending' ? `<button class="btn btn-primary btn-sm" onclick="updateStatus('${order.id}', 'Preparing')"><i class="fas fa-cocktail"></i> Start Preparing</button>` : ''}
+                        ${order.status === 'Preparing' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${order.id}', 'Ready')"><i class="fas fa-check"></i> Mark Ready</button>` : ''}
+                        ${order.status === 'Ready' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${order.id}', 'Completed')"><i class="fas fa-check-double"></i> Complete</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(orderId, newStatus) {
+            const orders = await getLocalData('orders');
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                await setLocalData('orders', orders);
+                showNotification(`Order ${newStatus.toLowerCase()}`, 'success');
+                loadDashboard();
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'Pending': '<span class="badge badge-warning">Pending</span>',
+                'Preparing': '<span class="badge badge-info">Preparing</span>',
+                'Ready': '<span class="badge badge-success">Ready</span>',
+                'Completed': '<span class="badge badge-gold">Completed</span>'
+            };
+            return badges[status] || `<span class="badge">${status}</span>`;
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

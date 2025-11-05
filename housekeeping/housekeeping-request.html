@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Housekeeping Request - GINHAWA Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <link rel="stylesheet" href="housekeeping.css">
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="../customer-home.html" class="navbar-brand">
+                    <i class="fas fa-hotel"></i>
+                    <span class="brand-name">GINHAWA</span>
+                </a>
+
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="../customer-home.html" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userName">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i>
+                                <span>Toggle Theme</span>
+                            </button>
+                            <button class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="housekeeping-header">
+                    <h1><i class="fas fa-broom"></i> Housekeeping Request</h1>
+                    <p>We're here to make your stay comfortable</p>
+                </div>
+
+                <!-- Request Form -->
+                <div id="requestForm" class="housekeeping-view active">
+                    <div class="card" style="max-width: 800px; margin: 0 auto;">
+                        <div class="card-header">
+                            <h2>Submit a Request</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="formHousekeeping" onsubmit="submitRequest(event)">
+                                <div class="form-group">
+                                    <label for="roomNumber" class="form-label">
+                                        <i class="fas fa-door-open"></i> Room Number *
+                                    </label>
+                                    <input type="text" id="roomNumber" class="form-input" placeholder="e.g., 101, 205" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-list-check"></i> Request Type * (Select all that apply)
+                                    </label>
+                                    <div class="request-types">
+                                        <label class="checkbox-card">
+                                            <input type="checkbox" name="requestType" value="Room Cleaning">
+                                            <div class="checkbox-content">
+                                                <i class="fas fa-broom"></i>
+                                                <span>Room Cleaning</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="checkbox-card">
+                                            <input type="checkbox" name="requestType" value="Fresh Towels">
+                                            <div class="checkbox-content">
+                                                <i class="fas fa-soap"></i>
+                                                <span>Fresh Towels</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="checkbox-card">
+                                            <input type="checkbox" name="requestType" value="Toiletries">
+                                            <div class="checkbox-content">
+                                                <i class="fas fa-pump-soap"></i>
+                                                <span>Toiletries</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="checkbox-card">
+                                            <input type="checkbox" name="requestType" value="Maintenance">
+                                            <div class="checkbox-content">
+                                                <i class="fas fa-wrench"></i>
+                                                <span>Maintenance</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="checkbox-card">
+                                            <input type="checkbox" name="requestType" value="Other">
+                                            <div class="checkbox-content">
+                                                <i class="fas fa-ellipsis"></i>
+                                                <span>Other</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="notes" class="form-label">
+                                        <i class="fas fa-comment"></i> Additional Notes
+                                    </label>
+                                    <textarea id="notes" class="form-textarea" placeholder="Please provide any additional details..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-paper-plane"></i> Submit Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation View -->
+                <div id="confirmationView" class="housekeeping-view">
+                    <div class="card confirmation-card" style="max-width: 700px; margin: 0 auto;">
+                        <div class="card-body text-center">
+                            <div class="success-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2 class="text-gold">Request Received!</h2>
+                            <p class="text-muted mb-3">Your housekeeping request has been submitted</p>
+                            
+                            <div class="request-id">
+                                Request ID: <span id="requestId"></span>
+                            </div>
+
+                            <p class="mt-2">Our housekeeping team will attend to your request shortly.</p>
+
+                            <div class="confirmation-details" id="confirmationDetails">
+                                <!-- Details will be loaded here -->
+                            </div>
+
+                            <div class="button-group">
+                                <a href="../customer-home.html" class="btn btn-primary">
+                                    <i class="fas fa-home"></i> Back to Home
+                                </a>
+                                <button onclick="makeAnotherRequest()" class="btn btn-outline">
+                                    <i class="fas fa-plus"></i> Make Another Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js"></script>
+    <script src="housekeeping.js"></script>
+</body>
+</html>
