@@ -49,6 +49,11 @@
         <i class="fas fa-tools"></i> Admin Portal
       </h1>
       <p class="text-secondary mb-3">Choose a module to manage</p>
+
+      <div class="card" style="padding:0; overflow:hidden; margin-bottom:16px;">
+        <div class="threads-container" id="threadsHero" style="height:260px;"></div>
+      </div>
+
       <section class="card-grid">
       
 
@@ -105,7 +110,18 @@
   <script src="firebase-db.js"></script>
   <!-- Shared UI + helpers -->
   <script src="shared/shared-functions.js?v=2"></script>
-  
+  <!-- OGL + Threads effect -->
+  <script src="https://unpkg.com/ogl@0.0.105/dist/ogl.min.js"></script>
+  <link rel="stylesheet" href="shared/threads.css">
+  <script src="shared/threads.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      const el = document.getElementById('threadsHero');
+      if (el && window.ThreadsEffect) {
+        window.ThreadsEffect.init(el, { color:[0.83,0.76,0.35], amplitude:1, distance:0.0, enableMouseInteraction:true });
+      }
+    });
+  </script>
 </body>
 <style>
   .container { max-width: 1100px; margin: 0 auto; }
