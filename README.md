@@ -13,7 +13,7 @@ This repository contains the admin-facing modules for the HCI Hotel & Restaurant
 - `bar/`: Bar operations and drink orders
 - `billing/`: Billing and invoicing
 - `shared/`: Shared styles and JS utilities
-- `firebase-config.js`, `firebase-db.js`, `init-security-check.js`: Firebase setup and security gates
+- `firebase-config.js`, `firebase-db.js`: Firebase setup
 
 ## Getting Started
 
@@ -46,5 +46,5 @@ This repo is a static site—no build step required.
 
 ## Security
 
-The admin portal references `init-security-check.js` to guard pages. Ensure rules in `firestore.rules` are deployed to your Firebase project.
+Ensure rules in `firestore.rules` are deployed to your Firebase project.
 
