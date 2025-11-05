@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCI Admin Portal</title>
+  <link rel="stylesheet" href="shared/shared-styles.css">
+</head>
+<body>
+  <header>
+    <h1>HCI Admin Portal</h1>
+    <p>Choose a module to manage.</p>
+  </header>
+
+  <main class="container">
+    <section class="card-grid">
+      <a class="card" href="staff-login.html">
+        <h2>Staff Login</h2>
+        <p>Authenticate to access admin modules.</p>
+      </a>
+
+      <a class="card" href="front-office/front-office-dashboard.html">
+        <h2>Front Office</h2>
+        <p>Check-ins, check-outs, and guest services.</p>
+      </a>
+
+      <a class="card" href="reservation/reservation.html">
+        <h2>Reservations</h2>
+        <p>Manage bookings and availability.</p>
+      </a>
+
+      <a class="card" href="room-facilities/room-facilities-dashboard.html">
+        <h2>Room Facilities</h2>
+        <p>Assign rooms, maintenance, and amenities.</p>
+      </a>
+
+      <a class="card" href="housekeeping/housekeeping-dashboard.html">
+        <h2>Housekeeping</h2>
+        <p>Cleaning schedules and requests.</p>
+      </a>
+
+      <a class="card" href="kitchen/kitchen-dashboard.html">
+        <h2>Kitchen</h2>
+        <p>Food orders and kitchen operations.</p>
+      </a>
+
+      <a class="card" href="bar/bar-dashboard.html">
+        <h2>Bar</h2>
+        <p>Drink orders and bar management.</p>
+      </a>
+
+      <a class="card" href="billing/billing-dashboard.html">
+        <h2>Billing</h2>
+        <p>Invoices, payments, and receipts.</p>
+      </a>
+    </section>
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script src="firebase-db.js"></script>
+  <script src="init-security-check.js"></script>
+</body>
+<style>
+  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #0f1115; color: #e6e6e6; }
+  header { padding: 32px 20px; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0)); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  h1 { margin: 0 0 8px; font-size: 28px; }
+  p { margin: 0; color: #b4b8c2; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .card { display: block; padding: 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; text-decoration: none; color: inherit; transition: transform 120ms ease, background 120ms ease, border-color 120ms ease; }
+  .card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); }
+  .card h2 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; font-size: 14px; color: #c3c7d1; }
+</style>
+</html>
+
