@@ -145,7 +145,7 @@ function timeAgo(timestamp) {
 function checkAuth(userType = 'customer') {
     const user = JSON.parse(sessionStorage.getItem('user'));
     if (!user || user.type !== userType) {
-        window.location.href = userType === 'customer' ? '/login.html' : '/staff-login.html';
+        window.location.href = userType === 'customer' ? '/login.html' : '/index.html';
         return null;
     }
     return user;
@@ -153,7 +153,7 @@ function checkAuth(userType = 'customer') {
 
 function logout() {
     sessionStorage.removeItem('user');
-    window.location.href = '/login.html';
+    window.location.href = '/index.html';
 }
 
 function getCurrentUser() {
