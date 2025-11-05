@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "github": { "enabled": true },
+  "redirects": [
+    { "source": "/staff-login", "destination": "/", "permanent": true },
+    { "source": "/staff-login.html", "destination": "/", "permanent": true }
+  ],
   "headers": [
     {
       "source": "(.*)\\.(css|js|png|jpg|jpeg|gif|webp)",
