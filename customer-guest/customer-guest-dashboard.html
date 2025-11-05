@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Customer Guest Dashboard - GINHAWA Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/shared-styles.css">
+    <style>
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .customer-card {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--gold-primary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .customer-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .customer-name {
+            color: var(--gold-primary);
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .customer-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+
+        .customer-phone {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .customer-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .customer-stat {
+            font-size: 0.85rem;
+        }
+
+        .customer-stat i {
+            color: var(--gold-primary);
+            margin-right: 5px;
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section h3 {
+            color: var(--gold-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            padding: 10px;
+            background-color: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .activity-item {
+            padding: 15px;
+            background-color: var(--bg-secondary);
+            border-left: 3px solid var(--gold-primary);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .activity-type {
+            color: var(--gold-primary);
+            font-weight: bold;
+        }
+
+        .activity-date {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .activity-details {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gold-primary);
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="page-wrapper">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="customer-guest-dashboard.html" class="navbar-brand">
+                    <i class="fas fa-users"></i>
+                    <span><span class="brand-name">GINHAWA</span> | Customer Guest</span>
+                </a>
+
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <ul class="navbar-nav" id="navMenu">
+                    <li><a href="customer-guest-dashboard.html" class="nav-link active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a></li>
+                    <li class="account-dropdown">
+                        <button class="account-btn" id="accountBtn">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Customer Guest</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="accountDropdown">
+                            <button class="dropdown-item" onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i>
+                                <span>Toggle Theme</span>
+                            </button>
+                            <button class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <h1 class="text-gold mb-2"><i class="fas fa-users"></i> Customer Guest Dashboard</h1>
+                <p class="text-secondary mb-3">View and manage customer information</p>
+
+                <!-- Stats -->
+                <div class="grid-4 mb-3">
+                    <div class="stat-card">
+                        <h3 id="totalCustomers">0</h3>
+                        <p>Total Customers</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalBookings">0</h3>
+                        <p>Total Bookings</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalOrders">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalReservations">0</h3>
+                        <p>Total Reservations</p>
+                    </div>
+                </div>
+
+                <!-- Customers List -->
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="text-gold mb-2"><i class="fas fa-address-book"></i> Registered Customers</h2>
+                        <div id="customersList" class="grid-4"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 GINHAWA Hotel & After Glow Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Customer Details Modal -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="text-gold"><i class="fas fa-user"></i> Customer Details</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="customerDetails"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (v9.x Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+    <script src="../firebase-db.js"></script>
+    
+    <script src="../shared/shared-functions.js?v=2"></script>
+    <script>
+        // Check authentication for staff in admin panel
+        const user = checkAuth('staff');
+
+        // Load all data
+        let customers = [];
+        let bookings = [];
+        let orders = [];
+        let reservations = [];
+
+        async function loadData() {
+            customers = await getLocalData('customers');
+            bookings = await getLocalData('hotelBookings');
+            orders = await getLocalData('orders');
+            reservations = await getLocalData('restaurantReservations');
+
+            updateStats();
+            displayCustomers();
+        }
+
+        function updateStats() {
+            document.getElementById('totalCustomers').textContent = customers.length;
+            document.getElementById('totalBookings').textContent = bookings.length;
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('totalReservations').textContent = reservations.length;
+        }
+
+        function displayCustomers() {
+            const container = document.getElementById('customersList');
+
+            if (customers.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-user-slash"></i>
+                        <p>No customers registered yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = customers.map(customer => {
+                const customerBookings = bookings.filter(b => b.customerEmail === customer.email);
+                const customerOrders = orders.filter(o => o.email === customer.email);
+                const customerReservations = reservations.filter(r => r.customerEmail === customer.email);
+
+                return `
+                    <div class="customer-card" onclick="viewCustomer('${customer.email}')">
+                        <div class="customer-name">${customer.name}</div>
+                        <div class="customer-email"><i class="fas fa-envelope"></i> ${customer.email}</div>
+                        <div class="customer-phone"><i class="fas fa-phone"></i> ${customer.phone || 'N/A'}</div>
+                        <div class="customer-stats">
+                            <div class="customer-stat"><i class="fas fa-bed"></i> ${customerBookings.length}</div>
+                            <div class="customer-stat"><i class="fas fa-utensils"></i> ${customerOrders.length}</div>
+                            <div class="customer-stat"><i class="fas fa-calendar"></i> ${customerReservations.length}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewCustomer(email) {
+            const customer = customers.find(c => c.email === email);
+            if (!customer) return;
+
+            const customerBookings = bookings.filter(b => b.customerEmail === email);
+            const customerOrders = orders.filter(o => o.email === email);
+            const customerReservations = reservations.filter(r => r.customerEmail === email);
+
+            const detailsHTML = `
+                <div class="modal-section">
+                    <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">${customer.name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value">${customer.email}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value">${customer.phone || 'Not provided'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Total Activity</div>
+                            <div class="info-value">${customerBookings.length + customerOrders.length + customerReservations.length} items</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3><i class="fas fa-bed"></i> Hotel Bookings (${customerBookings.length})</h3>
+                    ${customerBookings.length === 0 ? 
+                        '<p class="text-secondary">No bookings found</p>' :
+                        customerBookings.map(booking => `
+                            <div class="activity-item">
+                                <div class="activity-header">
+                                    <div>
+                                        <span class="activity-type">Booking #${booking.id}</span>
+                                        <span class="badge ${booking.status === 'Confirmed' ? 'badge-success' : booking.status === 'Checked-in' ? 'badge-info' : 'badge-secondary'}">${booking.status}</span>
+                                    </div>
+                                    <div class="activity-date">${new Date(booking.bookingDate).toLocaleDateString()}</div>
+                                </div>
+                                <div class="activity-details">
+                                    <strong>${booking.roomType}</strong> - Room ${booking.roomNumber || 'TBA'}<br>
+                                    ${booking.checkin} to ${booking.checkout} (${booking.nights} ${booking.nights === 1 ? 'night' : 'nights'})<br>
+                                    ${booking.guests} ${booking.guests === 1 ? 'guest' : 'guests'} | ${booking.destination}<br>
+                                    ₱${booking.totalPrice.toLocaleString()}
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+
+                <div class="modal-section">
+                    <h3><i class="fas fa-utensils"></i> Food & Drink Orders (${customerOrders.length})</h3>
+                    ${customerOrders.length === 0 ?
+                        '<p class="text-secondary">No orders found</p>' :
+                        customerOrders.map(order => `
+                            <div class="activity-item">
+                                <div class="activity-header">
+                                    <div>
+                                        <span class="activity-type">${order.category} Order #${order.orderId}</span>
+                                        <span class="badge ${order.status === 'completed' ? 'badge-success' : order.status === 'preparing' ? 'badge-warning' : 'badge-info'}">${order.status}</span>
+                                    </div>
+                                    <div class="activity-date">${new Date(order.timestamp).toLocaleDateString()}</div>
+                                </div>
+                                <div class="activity-details">
+                                    ${order.items.map(item => `${item.name} x${item.quantity}`).join(', ')}<br>
+                                    ${order.deliveryOption} | ₱${order.totalPrice.toLocaleString()}
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+
+                <div class="modal-section">
+                    <h3><i class="fas fa-calendar-check"></i> Restaurant Reservations (${customerReservations.length})</h3>
+                    ${customerReservations.length === 0 ?
+                        '<p class="text-secondary">No reservations found</p>' :
+                        customerReservations.map(reservation => `
+                            <div class="activity-item">
+                                <div class="activity-header">
+                                    <div>
+                                        <span class="activity-type">Reservation #${reservation.id}</span>
+                                        <span class="badge ${reservation.status === 'Confirmed' ? 'badge-success' : 'badge-warning'}">${reservation.status}</span>
+                                    </div>
+                                    <div class="activity-date">${new Date(reservation.reservationDate).toLocaleDateString()}</div>
+                                </div>
+                                <div class="activity-details">
+                                    ${reservation.date} at ${reservation.time}<br>
+                                    ${reservation.guests} ${reservation.guests === 1 ? 'guest' : 'guests'} | ${reservation.seating} seating<br>
+                                    ${reservation.specialRequests ? 'Special: ' + reservation.specialRequests : 'No special requests'}
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+
+            document.getElementById('customerDetails').innerHTML = detailsHTML;
+            document.getElementById('customerModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('customerModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('customerModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
